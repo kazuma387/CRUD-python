@@ -10,7 +10,8 @@ def crear_tabla():
     CREATE TABLE estudiantes(
         id_estudiante INTEGER,
         nombre_apellido VARCHAR(100),
-        cedula varchar(100),
+        edad VARCHAR(100),
+        cedula_representante VARCHAR(100),
         sexo VARCHAR(100),
         grado_seccion VARCHAR(100),
         fecha_nacimiento VARCHAR(100),
@@ -30,29 +31,28 @@ def crear_tabla():
         mensaje = "La tabla ya esta creada en la base de datos"
         messagebox.showwarning(titulo, mensaje)
     
-
 def borrar_tabla():
     conexion = ConexionDB()
-
     sql = "DROP TABLE estudiantes"
-
-    try:
-        conexion.cursor.execute(sql)
-        conexion.cerrar()
-        titulo = "Borrar Registro"
-        mensaje = "La tabla en la base de datos se borro con éxito"
-        messagebox.showinfo(titulo, mensaje)
-    except:
-        titulo = "Borrar Registro"
-        mensaje = "No hay ninguna tabla en la base de datos"
-        messagebox.showerror(titulo, mensaje)
+    # Pedir confirmación al usuario
+    respuesta = messagebox.askokcancel("Confirmación", "¿Está seguro de que desea borrar la tabla de estudiantes?")
+    if respuesta:
+        try:
+            conexion.cursor.execute(sql)
+            conexion.cerrar()
+            messagebox.showinfo("Borrar Registro", "La tabla de estudiantes se borró con éxito")
+        except Exception as e:
+            messagebox.showerror("Borrar Registro", f"No hay ninguna tabla de estudiantes en la base de datos. Error: {e}")
+    else:  # Si el usuario hizo clic en "Cancelar"
+        messagebox.showinfo("Cancelar", "La operación de borrado se ha cancelado.")
 
 class Estudiante:
-    def __init__(self, nombre_apellido, cedula,
+    def __init__(self, nombre_apellido, edad, cedula_representante,
     sexo, grado_seccion, fecha_nacimiento, lugar_nacimiento):
         self.id_estudiante = None
         self.nombre_apellido = nombre_apellido
-        self.cedula = cedula
+        self.edad = edad
+        self.cedula_representante = cedula_representante
         self.sexo = sexo
         self.grado_seccion = grado_seccion
         self.fecha_nacimiento = fecha_nacimiento
@@ -60,15 +60,15 @@ class Estudiante:
     
     # ver el estado del objeto
     def __str__(self):
-        return f"Estudiante[{self.nombre_apellido}, {self.cedula}, {self.sexo}, {self.grado_seccion}, {self.fecha_nacimiento}, {self.lugar_nacimiento}]"
+        return f"Estudiante[{self.nombre_apellido}, {self.edad}, {self.cedula_representante}, {self.sexo}, {self.grado_seccion}, {self.fecha_nacimiento}, {self.lugar_nacimiento}]"
     
 # para guardar en DB
 def guardar(estudiante):
     conexion = ConexionDB()
 
-    sql = f"""INSERT INTO estudiantes (nombre_apellido, cedula,
+    sql = f"""INSERT INTO estudiantes (nombre_apellido, edad, cedula_representante,
 sexo, grado_seccion, fecha_nacimiento, lugar_nacimiento)
-VALUES('{estudiante.nombre_apellido}', '{estudiante.cedula}', '{estudiante.sexo}',
+VALUES('{estudiante.nombre_apellido}', '{estudiante.edad}', '{estudiante.cedula_representante}', '{estudiante.sexo}',
 '{estudiante.grado_seccion}', '{estudiante.fecha_nacimiento}', '{estudiante.lugar_nacimiento}')"""
     
     try:
@@ -89,11 +89,13 @@ def listar():
     try:
         conexion.cursor.execute(sql)
         lista_estudiantes = conexion.cursor.fetchall()
-        conexion.cerrar()
     except:
         titulo = "Conexion al Registro"
-        mensaje = "Crea tabla en la base de datos"
-        messagebox.showwarning(titulo, mensaje)
+        mensaje = "Crea tabla estudiantes en la base de datos"
+        # messagebox.showwarning(titulo, mensaje)
+        print(mensaje)
+    finally:
+        conexion.cerrar()
     
     return lista_estudiantes
 
@@ -102,7 +104,7 @@ def editar(estudiante, id_estudiante):
     conexion = ConexionDB()
 
     sql = f"""UPDATE estudiantes
-    SET nombre_apellido = '{estudiante.nombre_apellido}', cedula ='{estudiante.cedula}', 
+    SET nombre_apellido = '{estudiante.nombre_apellido}', edad ='{estudiante.edad}', cedula_representante ='{estudiante.cedula_representante}', 
     sexo ='{estudiante.sexo}', grado_seccion = '{estudiante.grado_seccion}', 
     fecha_nacimiento = '{estudiante.fecha_nacimiento}', lugar_nacimiento = '{estudiante.lugar_nacimiento}'
     WHERE id_estudiante = '{id_estudiante}'"""
@@ -121,16 +123,21 @@ def eliminar(id_estudiante):
 
     sql = f"DELETE FROM estudiantes WHERE id_estudiante = {id_estudiante}"
 
-    try:
-        conexion.cursor.execute(sql)
-        conexion.cerrar()
-        titulo = "Eliminar de datos"
-        mensaje = "Se ha eliminado el registro"
-        messagebox.showinfo(titulo, mensaje)
-    except:
-        titulo = "Eliminar datos"
-        mensaje = "No se ha seleccionado ningun registro"
-        messagebox.showerror(titulo, mensaje)
+    # Pedir confirmación al usuario
+    respuesta = messagebox.askokcancel("Confirmación", "¿Está seguro de que desea borrar al estudiante?")
+    if respuesta:
+        try:
+            conexion.cursor.execute(sql)
+            conexion.cerrar()
+            titulo = "Eliminar de datos"
+            mensaje = "Se ha eliminado el registro"
+            messagebox.showinfo(titulo, mensaje)
+        except:
+            titulo = "Eliminar datos"
+            mensaje = "No se ha seleccionado ningun registro"
+            messagebox.showerror(titulo, mensaje)
+    else:  # Si el usuario hizo clic en "Cancelar"
+        messagebox.showinfo("Cancelar", "La operación de borrado se ha cancelado.")
 
 # para consultar un estudiante
 def consultar(campo=None, valor=None):
