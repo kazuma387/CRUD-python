@@ -398,6 +398,8 @@ class Frame_estudiantes(tk.Frame):
                 self.id_estudiante = None
                 # Limpia la ventana de consulta
                 limpiar_consulta()
+                # cerrar ventana de consulta
+                ventana_consultar.destroy()
             else:
                 messagebox.showerror("Error", "Debes seleccionar un estudiante para eliminarlo.")
 

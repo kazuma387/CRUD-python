@@ -400,6 +400,8 @@ class Frame_representantes(tk.Frame):
                 self.id_representante = None
                 # Limpia la ventana de consulta
                 limpiar_consulta()
+                # cerrar ventana de consulta
+                ventana_consultar.destroy()
             else:
                 messagebox.showerror("Error", "Debes seleccionar un representante para eliminarlo.")
     
